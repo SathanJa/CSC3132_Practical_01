@@ -1,3 +1,4 @@
+
 <html lang="HTML">
 <head>
 
@@ -102,9 +103,26 @@ require_once 'func.php';
     <div class="content">
         <div class="left">
             <div class="parking-container">
-                <div>1</div>
-                <div>1</div>
-                <div>1</div>
+                <?php
+
+                $q = "SELECT parking_slot, vehicle_no FROM parkinglog";
+
+                $data = GetTableData($q,$connection);
+
+                foreach ($data as $key => $value) {
+                    if($value['vehicle_no']=='EMPTY'){
+                        echo "<div>";
+                    }
+                    else{
+                        echo "<div style='background-color:#FF5555'>";
+                    }
+                    echo $value['parking_slot'];
+                    echo "<br>";                    
+                    echo $value['vehicle_no'];
+                    echo "</div>";
+                }
+
+                ?>
             </div>
         </div>
         <div class="right">
@@ -114,9 +132,8 @@ require_once 'func.php';
                         <td align="right">Option:</td>
                         <td>
                             <label>
-                                <input type="radio" name="park" value="alloc">Allocate
+                                <input type="radio" name="park" value="alloc" checked>Allocate
                                 <input type="radio" name="park" value="free">Free
-
                             </label>
                         </td>
                         <td>
@@ -132,6 +149,13 @@ require_once 'func.php';
                         </td>
                         <td>
                             <label class="error">
+                            <?php
+
+                            if($_SERVER['REQUEST_METHOD']=='POST' && empty($_POST['slot'])){
+                                RequiredField($_POST['slot'],'please enter slot number <br>');
+                            }
+
+                            ?>
                             </label>
 
                         </td>
@@ -144,7 +168,14 @@ require_once 'func.php';
                             </label>
                         </td>
                         <td>
-                            <label class="error">
+                            <label class="error" id="error">
+                            <?php
+
+                            if($_SERVER['REQUEST_METHOD']=='POST' && $_POST['park']=='alloc' && empty($_POST['vno'])){
+                                RequiredField($_POST['vno'],'please enter vehicle number <br>');
+                            }
+
+                            ?>
                                 
                             </label>
                         </td>
@@ -171,7 +202,39 @@ require_once 'func.php';
     </div>
 </div>
 
+<?php
+
+if($_SERVER['REQUEST_METHOD']=='POST' && $_POST['slot']!=''){
+    $parkType = $_POST['park'];
+    $slot = $_POST['slot'];
+    $vehiNo = $_POST['vno'];
+
+    if($_POST['slot']!='' && $_POST['park']!=''){
+        if($parkType=='alloc'){
+            $q = "SELECT parking_slot FROM parkinglog WHERE id=$slot AND vehicle_no='EMPTY'";
+            $result = mysqli_query($connection,$q);
+            if (mysqli_num_rows($result)==1){
+                $q = "UPDATE parkinglog SET vehicle_no='$vehiNo' WHERE id=$slot";
+                mysqli_query($connection,$q);
+                echo "<script> location.replace('index.php'); </script>";
+                //header('location:index.php');
+            }
+            else{
+                $q = "SELECT vehicle_no FROM parkinglog WHERE id=$slot";
+                $result = mysqli_query($connection,$q);
+                $row = mysqli_fetch_row($result);
+                echo "<script>document.getElementById('error').innerHTML = 'This slot is not availbale, allready allocate to ".$row[0]."';</script>";
+            }
+        }
+        else{
+            $q = "UPDATE parkinglog SET vehicle_no='EMPTY' WHERE id=$slot";
+            $result = mysqli_query($connection,$q);
+            echo "<script> location.replace('index.php'); </script>";
+            //header('location:index.php');
+        }
+    }
+
+}
+?>
 </body>
-
 </html>
-
