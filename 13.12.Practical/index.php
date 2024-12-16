@@ -3,9 +3,9 @@
 
     <title>Parking Management App</title>
     <style>
-        <
+        
         style type = "text/css"
-        >
+        
         .main {
             margin: 40px;
             padding: 20px;
@@ -57,7 +57,7 @@
             flex-wrap: wrap;
         }
 
-        .parking-container > div {
+        .parking-container  {
             background-color: #f1f1f1;
             margin: 10px;
             padding: 5px;
